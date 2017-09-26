@@ -44,9 +44,18 @@ class ReviewForm(forms.Form):
     add_review = forms.CharField(max_length=255, widget=forms.Textarea)
     rating = forms.ChoiceField(choices=((1, "1"), (2, "2"), (3, "3"), (4, "4"), (5, "5")))
 
+def author_namelist():
+    return Author.objects.values_list("name", "name")
+
 class BookReviewForm(forms.Form):
     title = forms.CharField(max_length=255)
-    author = forms.ChoiceField(choices=Author.objects.values_list("name", "name"))
+    author = forms.ChoiceField(choices=author_namelist, required=False)
     new_author = forms.CharField(max_length=255, required=False)
     review = forms.CharField(max_length=255, widget=forms.Textarea)
     rating = forms.ChoiceField(choices=((1, "1"), (2, "2"), (3, "3"), (4, "4"), (5, "5")))
+    def clean(self):
+        data = self.cleaned_data
+        if len(data.get("author")) < 1 and len(data.get("new_author")) < 1:
+            self.add_error("new_author", "Must have an author")
+        elif Author.objects.filter(name=data.get("new_author")):
+            self.add_error("new_author", "Author already exists")

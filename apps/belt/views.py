@@ -52,7 +52,7 @@ def create(request):
         form = BookReviewForm(request.POST)
         if form.is_valid():
             form = form.cleaned_data
-            if "new_author" in form:
+            if len(form["new_author"]) > 0:
                 author = Author.objects.create(name=form["new_author"])
             else:
                 author = Author.objects.get(name=form["author"])
